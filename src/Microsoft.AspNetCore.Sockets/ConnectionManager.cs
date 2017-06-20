@@ -51,6 +51,8 @@ namespace Microsoft.AspNetCore.Sockets
         {
             var id = MakeNewConnectionId();
 
+            _logger.LogDebug("New connection {connectionId} created", id);
+
             var transportToApplication = Channel.CreateUnbounded<byte[]>();
             var applicationToTransport = Channel.CreateUnbounded<byte[]>();
 
@@ -94,6 +96,8 @@ namespace Microsoft.AspNetCore.Sockets
                 return;
             }
 
+            _logger.LogTrace("Scanning connections for inactive ones");
+
             try
             {
                 if (_disposed || Debugger.IsAttached)
@@ -124,7 +128,7 @@ namespace Microsoft.AspNetCore.Sockets
                         c.Value.Lock.Release();
                     }
 
-                    // Once the decision has been made to to dispose we don't check the status again
+                    // Once the decision has been made to dispose we don't check the status again
                     if (status == DefaultConnectionContext.ConnectionStatus.Inactive && (DateTimeOffset.UtcNow - lastSeenUtc).TotalSeconds > 5)
                     {
                         var ignore = DisposeAndRemoveAsync(c.Value);
