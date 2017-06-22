@@ -51,7 +51,7 @@ namespace Microsoft.AspNetCore.Sockets
         {
             var id = MakeNewConnectionId();
 
-            _logger.LogDebug("New connection {connectionId} created", id);
+            _logger.CreatedNewConnection(id);
 
             var transportToApplication = Channel.CreateUnbounded<byte[]>();
             var applicationToTransport = Channel.CreateUnbounded<byte[]>();
@@ -70,7 +70,7 @@ namespace Microsoft.AspNetCore.Sockets
             if (_connections.TryRemove(id, out _))
             {
                 // Remove the connection completely
-                _logger.LogDebug("Removing {connectionId} from the list of connections", id);
+                _logger.RemovedConnection(id);
             }
         }
 
@@ -96,7 +96,7 @@ namespace Microsoft.AspNetCore.Sockets
                 return;
             }
 
-            _logger.LogTrace("Scanning connections for inactive ones");
+            _logger.ScanningConnections();
 
             try
             {
@@ -178,7 +178,7 @@ namespace Microsoft.AspNetCore.Sockets
             }
             catch (Exception ex)
             {
-                _logger.LogError(0, ex, "Failed disposing connection {connectionId}", connection.ConnectionId);
+                _logger.FailedDispose(connection.ConnectionId, ex);
             }
             finally
             {

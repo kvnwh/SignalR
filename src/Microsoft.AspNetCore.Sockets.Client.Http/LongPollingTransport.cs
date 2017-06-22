@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Sockets.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -35,7 +36,7 @@ namespace Microsoft.AspNetCore.Sockets.Client
 
         public Task StartAsync(Uri url, IChannelConnection<SendMessage, byte[]> application)
         {
-            _logger.LogInformation("Starting {0}", nameof(LongPollingTransport));
+            _logger.StartTransport();
 
             _application = application;
 
@@ -45,8 +46,7 @@ namespace Microsoft.AspNetCore.Sockets.Client
 
             Running = Task.WhenAll(_sender, _poller).ContinueWith(t =>
             {
-                _logger.LogDebug("Transport stopped. Exception: '{0}'", t.Exception?.InnerException);
-
+                _logger.TransportStopped(t.Exception?.InnerException);
                 _application.Output.TryComplete(t.IsFaulted ? t.Exception.InnerException : null);
                 return t;
             }).Unwrap();
