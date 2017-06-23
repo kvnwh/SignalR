@@ -68,8 +68,6 @@ namespace Microsoft.AspNetCore.Sockets.Client
             {
                 // exceptions have been handled in the Running task continuation by closing the channel with the exception
             }
-
-            _logger.TransportStopped(exception: null);
         }
 
         private async Task Poll(Uri pollUrl, CancellationToken cancellationToken)
@@ -114,6 +112,7 @@ namespace Microsoft.AspNetCore.Sockets.Client
             catch (OperationCanceledException)
             {
                 // transport is being closed
+                _logger.ReceiveCanceled();
             }
             catch (Exception ex)
             {

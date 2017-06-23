@@ -19,6 +19,9 @@ namespace Microsoft.AspNetCore.Sockets.Internal
         private static readonly Action<ILogger, DateTime, Exception> _receiveStopped =
             LoggerMessage.Define<DateTime>(LogLevel.Information, 8, "{time}: Receive loop stopped.");
 
+        private static readonly Action<ILogger, DateTime, Exception> _receiveCanceled =
+            LoggerMessage.Define<DateTime>(LogLevel.Debug, 7, "{time}: Receive loop canceled.");
+
         private static readonly Action<ILogger, DateTime, Exception> _transportStopping =
             LoggerMessage.Define<DateTime>(LogLevel.Information, 3, "{time}: Transport is stopping.");
 
@@ -27,6 +30,9 @@ namespace Microsoft.AspNetCore.Sockets.Internal
 
         private static readonly Action<ILogger, DateTime, Exception> _sendStopped =
             LoggerMessage.Define<DateTime>(LogLevel.Information, 14, "{time}: Send loop stopped.");
+
+        private static readonly Action<ILogger, DateTime, Exception> _sendCanceled =
+            LoggerMessage.Define<DateTime>(LogLevel.Debug, 13, "{time}: Send loop canceled.");
 
         // Category: WebSocketsTransport
 
@@ -39,15 +45,6 @@ namespace Microsoft.AspNetCore.Sockets.Internal
         private static readonly Action<ILogger, DateTime, int, Exception> _messageToApp =
             LoggerMessage.Define<DateTime, int>(LogLevel.Information, 6, "{time}: Passing message to application. Payload size: {count}.");
 
-        private static readonly Action<ILogger, DateTime, Exception> _receiveCanceled =
-            LoggerMessage.Define<DateTime>(LogLevel.Debug, 7, "{time}: Receive loop canceled.");
-
-        //private static readonly Action<ILogger, DateTime, Exception> _receiveStopped =
-        //    LoggerMessage.Define<DateTime>(LogLevel.Information, 8, "{time}: Receive loop stopped.");
-
-        //private static readonly Action<ILogger, DateTime, Exception> _sendStarted =
-        //    LoggerMessage.Define<DateTime>(LogLevel.Information, 9, "{time}: Starting the send loop.");
-
         private static readonly Action<ILogger, DateTime, int, Exception> _receivedFromApp =
             LoggerMessage.Define<DateTime, int>(LogLevel.Debug, 10, "{time}: Received message from application. Payload size: {count}.");
 
@@ -56,12 +53,6 @@ namespace Microsoft.AspNetCore.Sockets.Internal
 
         private static readonly Action<ILogger, DateTime, Exception> _errorSendingMessage =
             LoggerMessage.Define<DateTime>(LogLevel.Error, 12, "{time}: Error while sending a message.");
-
-        private static readonly Action<ILogger, DateTime, Exception> _sendCanceled =
-            LoggerMessage.Define<DateTime>(LogLevel.Debug, 13, "{time}: Send loop canceled.");
-
-        //private static readonly Action<ILogger, DateTime, Exception> _sendStopped =
-        //    LoggerMessage.Define<DateTime>(LogLevel.Information, 14, "{time}: Send loop stopped.");
 
         private static readonly Action<ILogger, DateTime, Exception> _closingWebSocket =
             LoggerMessage.Define<DateTime>(LogLevel.Information, 15, "{time}: Closing WebSocket.");

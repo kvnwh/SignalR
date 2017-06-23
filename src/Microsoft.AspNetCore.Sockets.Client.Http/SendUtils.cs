@@ -84,6 +84,7 @@ namespace Microsoft.AspNetCore.Sockets.Client
                         message.SendResult?.TrySetCanceled();
                     }
                 }
+                logger.SendCanceled();
             }
             catch (Exception ex)
             {
