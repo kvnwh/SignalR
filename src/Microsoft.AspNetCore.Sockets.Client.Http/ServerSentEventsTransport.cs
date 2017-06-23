@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Sockets.Internal;
 using Microsoft.AspNetCore.Sockets.Internal.Formatters;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -41,7 +42,7 @@ namespace Microsoft.AspNetCore.Sockets.Client
 
         public Task StartAsync(Uri url, IChannelConnection<SendMessage, byte[]> application)
         {
-            _logger.LogInformation("Starting {transportName}", nameof(ServerSentEventsTransport));
+            _logger.StartTransport();
 
             _application = application;
             var sendTask = SendUtils.SendMessages(url, _application, _httpClient, _transportCts, _logger);
@@ -49,10 +50,7 @@ namespace Microsoft.AspNetCore.Sockets.Client
 
             Running = Task.WhenAll(sendTask, receiveTask).ContinueWith(t =>
             {
-                if (t.Exception != null)
-                {
-                    _logger.LogError(0, t.Exception.InnerException, "Transport stopped");
-                }
+                _logger.TransportStopped(t.Exception?.InnerException);
 
                 _application.Output.TryComplete(t.IsFaulted ? t.Exception.InnerException : null);
                 return t;
@@ -63,7 +61,7 @@ namespace Microsoft.AspNetCore.Sockets.Client
 
         private async Task OpenConnection(IChannelConnection<SendMessage, byte[]> application, Uri url, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Starting receive loop");
+            _logger.StartReceive();
 
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
@@ -85,7 +83,7 @@ namespace Microsoft.AspNetCore.Sockets.Client
                     {
                         if (input.IsEmpty && result.IsCompleted)
                         {
-                            _logger.LogDebug("Server-Sent Event Stream ended");
+                            _logger.EventStreamEnded();
                             break;
                         }
 
@@ -115,12 +113,13 @@ namespace Microsoft.AspNetCore.Sockets.Client
             {
                 _transportCts.Cancel();
                 stream.Dispose();
+                _logger.ReceiveStopped();
             }
         }
 
         public async Task StopAsync()
         {
-            _logger.LogInformation("Transport {transportName} is stopping", nameof(ServerSentEventsTransport));
+            _logger.TransportStopping();
             _transportCts.Cancel();
             _application.Output.TryComplete();
             await Running;

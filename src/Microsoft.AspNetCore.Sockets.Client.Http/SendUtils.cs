@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Sockets.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNetCore.Sockets.Client
@@ -19,7 +20,7 @@ namespace Microsoft.AspNetCore.Sockets.Client
 
         public static async Task SendMessages(Uri sendUrl, IChannelConnection<SendMessage, byte[]> application, HttpClient httpClient, CancellationTokenSource transportCts, ILogger logger)
         {
-            logger.LogInformation("Starting the send loop");
+            logger.SendStarted();
             IList<SendMessage> messages = null;
             try
             {
@@ -103,7 +104,7 @@ namespace Microsoft.AspNetCore.Sockets.Client
                 transportCts.Cancel();
             }
 
-            logger.LogInformation("Send loop stopped");
+            logger.SendStopped();
         }
     }
 }

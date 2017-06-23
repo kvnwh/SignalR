@@ -56,7 +56,7 @@ namespace Microsoft.AspNetCore.Sockets.Client
 
         public async Task StopAsync()
         {
-            _logger.LogInformation("Transport {0} is stopping", nameof(LongPollingTransport));
+            _logger.TransportStopping();
 
             _transportCts.Cancel();
 
@@ -69,12 +69,12 @@ namespace Microsoft.AspNetCore.Sockets.Client
                 // exceptions have been handled in the Running task continuation by closing the channel with the exception
             }
 
-            _logger.LogInformation("Transport {0} stopped", nameof(LongPollingTransport));
+            _logger.TransportStopped(exception: null);
         }
 
         private async Task Poll(Uri pollUrl, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Starting the receive loop");
+            _logger.StartReceive();
             try
             {
                 while (!cancellationToken.IsCancellationRequested)
@@ -87,14 +87,14 @@ namespace Microsoft.AspNetCore.Sockets.Client
 
                     if (response.StatusCode == HttpStatusCode.NoContent || cancellationToken.IsCancellationRequested)
                     {
-                        _logger.LogDebug("The server is closing the connection");
+                        _logger.ClosingConnection();
 
                         // Transport closed or polling stopped, we're done
                         break;
                     }
                     else
                     {
-                        _logger.LogDebug("Received messages from the server");
+                        _logger.ReceivedMessages();
 
                         // Until Pipeline starts natively supporting BytesReader, this is the easiest way to do this.
                         var payload = await response.Content.ReadAsByteArrayAsync();
@@ -117,14 +117,14 @@ namespace Microsoft.AspNetCore.Sockets.Client
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while polling '{0}': {1}", pollUrl, ex);
+                _logger.ErrorPolling(pollUrl, ex);
                 throw;
             }
             finally
             {
                 // Make sure the send loop is terminated
                 _transportCts.Cancel();
-                _logger.LogInformation("Receive loop stopped");
+                _logger.ReceiveStopped();
             }
         }
     }
